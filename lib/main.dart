@@ -1,4 +1,4 @@
-import 'package:always_awake_flutter/pages/location_page.dart';
+import 'package:always_awake_flutter/pages/location/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
