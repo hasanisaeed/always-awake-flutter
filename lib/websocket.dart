@@ -25,9 +25,9 @@ class Websocket {
     channel?.stream.listen(onMessageReceived as void Function(dynamic event)?);
   }
 
-  void sendMessage(String message) {
+  void sendMessage(message) {
     if (message.isNotEmpty) {
-      channel?.sink.add({'message': message});
+      channel?.sink.add(message);
     }
   }
 
