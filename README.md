@@ -4,9 +4,9 @@ Always Awake Flutter is an application designed to keep track of your location i
 
 ## Features
 
-- [] Real-time location tracking: Continuously monitor the user's location and send updates to a server.
-- [] WebSocket communication: Utilize WebSockets for live, bidirectional communication between the client and server.
-- [] Location permission handling: Request and manage location permissions.
-- [] Background location updates: Capable of sending location updates even when the app is running in the background.
-- [] Local data storage: Save location data locally on the device when there is no internet connection.
-- [] Automatic data sync: Automatically send the stored location data to the server as soon as the device connects to the internet.
+- [ ] **Real-time location tracking:** Continuously monitor the user's location and send updates to a server.
+- [ ] **WebSocket communication:** Utilize WebSockets for live, bidirectional communication between the client and server.
+- [ ] **Location permission handling:** Request and manage location permissions.
+- [ ] **Background location updates:** Capable of sending location updates even when the app is running in the background.
+- [ ] **Local data storage:** Save location data locally on the device when there is no internet connection.
+- [ ] **Automatic data sync:** Automatically send the stored location data to the server as soon as the device connects to the internet.
