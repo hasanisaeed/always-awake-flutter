@@ -21,6 +21,7 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_local_notifications: ^14.1.1
   web_socket_channel: ^2.4.0
+  location: ^5.0.0
 
 flutter:
   uses-material-design: true
