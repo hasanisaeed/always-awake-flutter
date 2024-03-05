@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:always_awake_flutter/utils.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -25,9 +27,13 @@ class Websocket {
     channel?.stream.listen(onMessageReceived as void Function(dynamic event)?);
   }
 
-  void sendMessage(message) {
-    if (message.isNotEmpty) {
-      channel?.sink.add(message);
+  void sendMessage(dynamic message) {
+    // Check if the message needs to be encoded to JSON
+    final String messageToSend =
+        message is String ? message : json.encode(message);
+
+    if (messageToSend.isNotEmpty) {
+      channel?.sink.add(messageToSend);
     }
   }
 
