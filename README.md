@@ -1,16 +1,12 @@
-# always_awake_flutter
+# Always Awake Flutter
 
-A new Flutter project.
+Always Awake Flutter is an application designed to keep track of your location in real-time and send updates to a server via a WebSocket connection. It's built with Flutter, making it cross-platform and capable of running on both Android and iOS devices.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- [] Real-time location tracking: Continuously monitor the user's location and send updates to a server.
+- [] WebSocket communication: Utilize WebSockets for live, bidirectional communication between the client and server.
+- [] Location permission handling: Request and manage location permissions.
+- [] Background location updates: Capable of sending location updates even when the app is running in the background.
+- [] Local data storage: Save location data locally on the device when there is no internet connection.
+- [] Automatic data sync: Automatically send the stored location data to the server as soon as the device connects to the internet.
