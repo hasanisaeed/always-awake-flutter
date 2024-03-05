@@ -1,4 +1,4 @@
-import 'package:always_awake_flutter/socket_page.dart';
+import 'package:always_awake_flutter/pages/location_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,11 +18,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepPurple,
         appBarTheme: const AppBarTheme(
           systemOverlayStyle:
-          SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+              SystemUiOverlayStyle(statusBarColor: Colors.transparent),
         ),
       ),
       title: 'WebSockets',
-      home:   const LocationPage(),
+      home: const LocationPage(),
     );
   }
 }
