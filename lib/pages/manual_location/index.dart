@@ -9,14 +9,14 @@ import '../../websocket.dart';
 import 'helper.dart';
 import 'location_service.dart';
 
-class LocationPage extends StatefulWidget {
-  const LocationPage({super.key});
+class ManualLocationPage extends StatefulWidget {
+  const ManualLocationPage({super.key});
 
   @override
-  State<LocationPage> createState() => _LocationPageState();
+  State<ManualLocationPage> createState() => _ManualLocationPageState();
 }
 
-class _LocationPageState extends State<LocationPage> {
+class _ManualLocationPageState extends State<ManualLocationPage> {
   late Websocket websocket;
   final LocationService locationService = LocationService();
 
@@ -77,7 +77,7 @@ class _LocationPageState extends State<LocationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Location Tracker")),
+      appBar: AppBar(title: const Text(" Manual Location Sending")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
