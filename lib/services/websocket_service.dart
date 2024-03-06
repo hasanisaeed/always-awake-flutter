@@ -1,17 +1,16 @@
 import 'dart:convert';
 
-import 'package:always_awake_flutter/utils.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '.env.dart';
+import '../.env.dart';
 
 class Websocket {
   WebSocketChannel? channel;
 
   Websocket({required String path, Map<String, dynamic>? params}) {
     // Convert the params Map into a URL query string if it's not null
-    String queryString = params != null ? mapToQueryString(params) : "";
+    String queryString = params != null ? _mapToQueryString(params) : "";
 
     String uriString = "$protocol://$host/$path" +
         (queryString.isNotEmpty ? "?$queryString" : "");
@@ -40,4 +39,12 @@ class Websocket {
   bool isConnected() {
     return channel?.closeCode == null;
   }
+}
+
+/// Helper function to convert Map<String, dynamic> to a query string
+String _mapToQueryString(Map<String, dynamic> params) {
+  return params.entries
+      .map((e) =>
+          '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}')
+      .join('&');
 }

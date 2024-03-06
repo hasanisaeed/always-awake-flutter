@@ -7,7 +7,7 @@ class PermissionDialog {
       builder: (BuildContext context) => AlertDialog(
         title: const Text('Location Permission'),
         content:
-            const Text('Need to Access Your Location for sending updates.'),
+        const Text('Need to Access Your Location for sending updates.'),
         actions: <Widget>[
           TextButton(
             onPressed: () {

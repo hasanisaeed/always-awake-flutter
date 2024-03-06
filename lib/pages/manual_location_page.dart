@@ -1,13 +1,12 @@
 import 'dart:developer';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
-import '../../.env.dart';
-import '../../websocket.dart';
-import 'helper.dart';
-import 'location_service.dart';
+import '../.env.dart';
+import '../services/websocket_service.dart';
+import 'dialog.dart';
+import '../services/location_service.dart';
 
 class ManualLocationPage extends StatefulWidget {
   const ManualLocationPage({super.key});
@@ -35,43 +34,34 @@ class _ManualLocationPageState extends State<ManualLocationPage> {
 
   Future<void> requestLocationPermission(
       BuildContext context, LocationService locationService) async {
-    LocationData? currentLocation = await locationService.getCurrentLocation();
+    Position? currentLocation = await locationService.getCurrentLocation();
     if (currentLocation != null) {
-      sendCurrentLocation(currentLocation);
+      locationService.sendLocation(currentLocation, websocket);
     } else {
-      showPermissionDialog(context, locationService);
+      _showPermissionDialog(context, locationService);
     }
   }
 
-  void showPermissionDialog(
+  void _showPermissionDialog(
       BuildContext context, LocationService locationService) {
     PermissionDialog.show(context, () async {
-      checkPermissionAndSendLocation(context, locationService);
+      _checkPermissionAndSendLocation(context, locationService);
     });
   }
 
   /// heck permission and send location after dialog is closed
-  Future<void> checkPermissionAndSendLocation(
+  Future<void> _checkPermissionAndSendLocation(
       BuildContext context, LocationService locationService) async {
-    LocationData? location = await locationService.getCurrentLocation();
-    if (location != null) {
+    Position? currentLocation = await locationService.getCurrentLocation();
+    if (currentLocation != null) {
       if (mounted) {
-        sendCurrentLocation(location);
+        locationService.sendLocation(currentLocation, websocket);
       }
     } else {
       if (mounted) {
         log('>> Location permission not granted');
       }
     }
-  }
-
-  void sendCurrentLocation(LocationData currentLocation) {
-    Map<String, dynamic> locationMessage = {
-      'latitude': currentLocation.latitude,
-      'longitude': currentLocation.longitude,
-    };
-    websocket.sendMessage(json.encode(locationMessage));
-    log(">> Location sent: (${currentLocation.latitude}, ${currentLocation.longitude})");
   }
 
   @override
