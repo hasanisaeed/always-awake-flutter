@@ -52,6 +52,7 @@ class CustomTaskHandler extends TaskHandler {
   @override
   void onDestroy(DateTime timestamp, SendPort? sendPort) async {
     log('>> onDestroy');
+    websocket.disconnect();
   }
 
   @override
