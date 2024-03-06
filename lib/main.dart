@@ -1,14 +1,7 @@
-import 'package:always_awake_flutter/handler.dart';
 import 'package:always_awake_flutter/pages/home_page.dart';
 import 'package:always_awake_flutter/pages/realtime_location_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-
-@pragma('vm:entry-point')
-void startCallback() {
-  FlutterForegroundTask.setTaskHandler(CustomTaskHandler());
-}
 
 void main() {
   runApp(const MyApp());

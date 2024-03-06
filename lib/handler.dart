@@ -1,10 +1,13 @@
 import 'dart:developer';
 import 'dart:isolate';
 
+import 'package:always_awake_flutter/database/location_model.dart';
+import 'package:always_awake_flutter/database/repository.dart';
 import 'package:always_awake_flutter/services/location_service.dart';
 import 'package:always_awake_flutter/services/websocket_service.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 import '.env.dart';
 
@@ -36,15 +39,19 @@ class CustomTaskHandler extends TaskHandler {
             'Current Location ($count): (${locationData.latitude}, ${locationData.longitude})',
       );
 
+      final String formattedTimestamp =
+          DateFormat('yyyy:MM:dd HH:mm:ss').format(timestamp);
+
       final Map<String, dynamic> locationMap = {
         'latitude': locationData.latitude,
         'longitude': locationData.longitude,
+        'timestamp': formattedTimestamp,
       };
 
       websocket.sendMessage(locationMap);
 
       // Send data to the main isolate.
-      sendPort?.send(count);
+      sendPort?.send(locationMap);
       count++;
     }
   }
@@ -66,3 +73,15 @@ class CustomTaskHandler extends TaskHandler {
     _sendPort?.send('onNotificationPressed');
   }
 }
+
+// void saveIntoDatabase() {
+//   var newTrip = LocationModel(
+//     latitude: 36.40979,
+//     longitude: 54.946442,
+//     speed: 50,
+//     createdAt: DateTime.now()
+//         .toString(), // Or handle createdAt within the Trip model or database default value
+//   );
+//
+//   LocationRepository().insertTrip(newTrip);
+// }

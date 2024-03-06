@@ -5,7 +5,12 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import 'package:flutter/material.dart';
 
-import '../main.dart';
+import '../handler.dart';
+
+@pragma('vm:entry-point')
+void startCallback() {
+  FlutterForegroundTask.setTaskHandler(CustomTaskHandler());
+}
 
 class RealTimeLocationPage extends StatefulWidget {
   const RealTimeLocationPage({Key? key}) : super(key: key);
@@ -15,7 +20,11 @@ class RealTimeLocationPage extends StatefulWidget {
 }
 
 class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
+  int _interval = 5000; // 5 seconds
   ReceivePort? _receivePort;
+  List<Map<String, dynamic>> locationList = [];
+  final TextEditingController _intervalController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   Future<void> _requestPermissionForAndroid() async {
     if (!Platform.isAndroid) {
@@ -39,7 +48,8 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
     }
   }
 
-  void _initForegroundTask({int interval = 15000}) {
+  void _initForegroundTask({int interval = 5000}) {
+    log(">> Current interval is $interval");
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         id: 500,
@@ -110,8 +120,11 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
 
     _receivePort = newReceivePort;
     _receivePort?.listen((data) {
-      log('>> STATE: $data');
-      if (data is String) {
+      if (data is Map<String, dynamic>) {
+        setState(() {
+          _addItemToList(data);
+        });
+      } else if (data is String) {
         if (data == "onNotificationPressed") {
           Navigator.of(context).pushNamed('/resume');
         }
@@ -145,7 +158,25 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
   @override
   void dispose() {
     _closeReceivePort();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _addItemToList(Map<String, dynamic> newItem) {
+    setState(() {
+      locationList.add(newItem);
+    });
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   @override
@@ -171,14 +202,84 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
       );
     }
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          buttonBuilder('start', onPressed: _startForegroundTask),
-          buttonBuilder('stop', onPressed: _stopForegroundTask),
-        ],
+    TextField intervalTextField() {
+      return TextField(
+        controller: _intervalController,
+        keyboardType: TextInputType.number,
+        maxLength: 8,
+        decoration: const InputDecoration(
+          labelText: 'Interval (ms)',
+          hintText: 'Enter a max 8-digit interval',
+          border: OutlineInputBorder(),
+        ),
+        onChanged: (value) async {
+          if (value.isNotEmpty) {
+            final newInterval = int.tryParse(value);
+            if (newInterval != null) {
+              setState(() {
+                _interval = newInterval;
+              });
+              if (await FlutterForegroundTask.isRunningService) {
+                _stopForegroundTask().then((_) {
+                  _initForegroundTask(
+                      interval: _interval); // Re-initialize with new interval
+                  _startForegroundTask(); // Restart the task
+                });
+              }
+            }
+          }
+        },
+      );
+    }
+
+    return Column(
+      children: [
+        buttonBuilder('Start Foreground Task', onPressed: _startForegroundTask),
+        buttonBuilder('Stop Foreground Task', onPressed: _stopForegroundTask),
+        intervalTextField(),
+        Expanded(child: _buildLoggerView()),
+      ],
+    );
+  }
+
+  Widget _buildLoggerView() {
+    return Container(
+      color: Colors.black.withOpacity(0.8),
+      child: ListView.separated(
+        controller: _scrollController,
+        itemCount: locationList.length,
+        itemBuilder: (context, index) {
+          final location = locationList[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 0),
+            child: IntrinsicHeight(
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "${location['timestamp']}: ",
+                      style: const TextStyle(color: Colors.amber, fontSize: 10),
+                    ),
+                    TextSpan(
+                      text: "Current: (${location['latitude']}, ${location['longitude']}) ",
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+              )
+
+            ),
+          );
+        },
+        separatorBuilder: (context, index) => Container(
+          margin: EdgeInsets.zero,
+          child: const Divider(
+            color: Colors.white10,
+            thickness: 1,
+          ),
+        ),
       ),
     );
   }
+
 }
