@@ -39,7 +39,7 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
     }
   }
 
-  void _initForegroundTask() {
+  void _initForegroundTask({int interval = 15000}) {
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         id: 500,
@@ -66,8 +66,8 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
         showNotification: true,
         playSound: false,
       ),
-      foregroundTaskOptions: const ForegroundTaskOptions(
-        interval: 10000,
+      foregroundTaskOptions: ForegroundTaskOptions(
+        interval: interval,
         isOnceEvent: false,
         autoRunOnBoot: true,
         allowWakeLock: true,
@@ -78,19 +78,20 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
 
   Future<bool> _startForegroundTask() async {
     await FlutterForegroundTask.saveData(key: 'data', value: 'Go!');
+
     // Register the receivePort before starting the service.
     final ReceivePort? receivePort = FlutterForegroundTask.receivePort;
-    log(">> ReceivePort is : $receivePort");
     final bool isRegistered = _registerReceivePort(receivePort);
     if (!isRegistered) {
       return false;
     }
+
     if (await FlutterForegroundTask.isRunningService) {
       return FlutterForegroundTask.restartService();
     } else {
       return FlutterForegroundTask.startService(
         notificationTitle: 'Wait for running...',
-        notificationText: 'Tap to run',
+        notificationText: 'Tap to return back',
         callback: startCallback,
       );
     }
@@ -109,13 +110,11 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
 
     _receivePort = newReceivePort;
     _receivePort?.listen((data) {
-      if (data is int) {
-      } else if (data is String) {
-        if (data == 'onNotificationPressed') {
+      log('>> STATE: $data');
+      if (data is String) {
+        if (data == "onNotificationPressed") {
           Navigator.of(context).pushNamed('/resume');
         }
-      } else if (data is DateTime) {
-        log('>> timestamp: ${data.toString()}');
       }
     });
 
