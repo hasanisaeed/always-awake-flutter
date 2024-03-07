@@ -21,17 +21,26 @@ class LocationRepository {
     return locations;
   }
 
-  Future<void> deleteRecord({required String latitude, required String longitude, required String createdAt}) async {
+  Future<void> deleteRecord(
+      {required String latitude,
+      required String longitude,
+      required String speed,
+      required String createdAt}) async {
     final db = await dbProvider.database;
     await db.delete(
       'mytable',
-      where: 'latitude = ? AND longitude = ? AND created_at = ?',
-      whereArgs: [latitude, longitude, createdAt],
+      where: 'speed = ? AND latitude = ? AND longitude = ? AND created_at = ?',
+      whereArgs: [speed, latitude, longitude, createdAt],
     );
   }
 
-  Future<void> insertRecord({required String latitude, required String longitude, required String createdAt}) async {
+  Future<void> insertRecord(
+      {required String latitude,
+      required String longitude,
+      required String speed,
+      required String createdAt}) async {
     LocationModel locationModel = LocationModel(
+      speed: double.parse(speed),
       latitude: double.parse(latitude),
       longitude: double.parse(longitude),
       createdAt: createdAt,

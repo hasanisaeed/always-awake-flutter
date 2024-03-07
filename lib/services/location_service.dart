@@ -32,6 +32,7 @@ class LocationService {
     Map<String, dynamic> locationMessage = {
       'latitude': currentLocation.latitude,
       'longitude': currentLocation.longitude,
+      'speed': currentLocation.speed,
     };
     websocket.sendMessage(json.encode(locationMessage));
     log(">> Location sent: (${currentLocation.latitude}, ${currentLocation.longitude})");

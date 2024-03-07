@@ -289,12 +289,16 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: "${location['created_at']}: ",
+                    text: "${location['created_at']} ",
                     style: const TextStyle(color: Colors.amber, fontSize: 10),
                   ),
                   TextSpan(
+                    text: "${location['speed'].toStringAsFixed(2)} km/h",
+                    style: const TextStyle(color: Colors.deepOrange, fontSize: 10),
+                  ),
+                  TextSpan(
                     text:
-                        "Current: (${location['latitude']}, ${location['longitude']}) ",
+                        " : Current: (${location['latitude']}, ${location['longitude']}) ",
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
