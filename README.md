@@ -9,7 +9,7 @@
     <br/>
     <b>Logger and foreground notification.</b>
     <br/>
-    <small>_The points on demo aren't my location :)_</small>
+    _The points on demo aren't my location :)
 </p>
 
 ## Features
