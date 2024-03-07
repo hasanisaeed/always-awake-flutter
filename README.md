@@ -4,7 +4,7 @@
 
 ## Demo
 
-<p style="text-align: center">
+<p align="center">
     <img src="./demo.gif" height="500" />
     <br/>
     <span>Demo: logger and foreground notification</span>
