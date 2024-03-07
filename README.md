@@ -7,9 +7,9 @@
 <p align="center">
     <img src="./demo.gif" height="500" />
     <br/>
-    <b>Logger and foreground notification</b>
+    <b>Logger and foreground notification.</b>
     <br/>
-    _<small style="color:grey">The points on demo are FAKE :)</small>_
+    <small>The points on demo are FAKE :)</small>
 </p>
 
 ## Features
