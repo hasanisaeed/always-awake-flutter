@@ -9,7 +9,7 @@
     <br/>
     <span>Demo: logger and foreground notification</span>
     <br/>
-    <small>The points on demo is FAKE :)</small>
+    <small>The points on demo are FAKE :)</small>
 </p>
 
 ## Features
