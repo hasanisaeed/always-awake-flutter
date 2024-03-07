@@ -8,8 +8,6 @@
     <img src="./demo.gif" height="500" />
     <br/>
     <b>Logger and foreground notification.</b>
-    <br/>
-    _The points on demo aren't my location :)_
 </p>
 
 ## Features
