@@ -16,7 +16,7 @@ class CustomTaskHandler extends TaskHandler {
   late Websocket websocket;
   LocationService locationService = LocationService();
 
-  int count = 0;
+  int count = 1;
 
   @override
   void onStart(DateTime timestamp, SendPort? sendPort) async {

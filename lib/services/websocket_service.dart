@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -15,7 +16,11 @@ class Websocket {
     String uriString = "$protocol://$host/$path" +
         (queryString.isNotEmpty ? "?$queryString" : "");
 
-    channel = WebSocketChannel.connect(Uri.parse(uriString));
+    try {
+      channel = WebSocketChannel.connect(Uri.parse(uriString));
+    } catch (e) {
+      log(">> Could not connect to the websocket: $uriString");
+    }
   }
 
   void disconnect() {

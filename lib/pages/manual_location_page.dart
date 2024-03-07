@@ -22,6 +22,10 @@ class _ManualLocationPageState extends State<ManualLocationPage> {
   @override
   void initState() {
     super.initState();
+    _initWebSocket();
+  }
+
+  void _initWebSocket() {
     websocket =
         Websocket(path: 'v3/1', params: {'api_key': API_KEY, 'notify_self': 1});
   }

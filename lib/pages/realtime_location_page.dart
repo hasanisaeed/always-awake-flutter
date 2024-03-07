@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import 'package:flutter/material.dart';
@@ -20,9 +21,9 @@ class RealTimeLocationPage extends StatefulWidget {
 }
 
 class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
-  int _interval = 5000; // 5 seconds
   ReceivePort? _receivePort;
   List<Map<String, dynamic>> locationList = [];
+  static int interval = 5000;
   final TextEditingController _intervalController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -48,7 +49,7 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
     }
   }
 
-  void _initForegroundTask({int interval = 5000}) {
+  void _initForegroundTask() {
     log(">> Current interval is $interval");
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
@@ -142,7 +143,7 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
   @override
   void initState() {
     super.initState();
-
+    _intervalController.text = interval.toString();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _requestPermissionForAndroid();
       _initForegroundTask();
@@ -189,56 +190,87 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
           title: const Text('Run Foreground Task'),
           centerTitle: true,
         ),
-        body: _buildContentView(),
+        body: _buildCombinedView(),
       ),
     );
   }
 
   Widget _buildContentView() {
-    buttonBuilder(String text, {VoidCallback? onPressed}) {
+    Widget customButton(String text, Color color, {VoidCallback? onPressed}) {
       return ElevatedButton(
         onPressed: onPressed,
+        style: ElevatedButton.styleFrom(backgroundColor: color),
         child: Text(text),
       );
     }
 
-    TextField intervalTextField() {
-      return TextField(
-        controller: _intervalController,
-        keyboardType: TextInputType.number,
-        maxLength: 8,
-        decoration: const InputDecoration(
-          labelText: 'Interval (ms)',
-          hintText: 'Enter a max 8-digit interval',
-          border: OutlineInputBorder(),
-        ),
-        onChanged: (value) async {
-          if (value.isNotEmpty) {
-            final newInterval = int.tryParse(value);
-            if (newInterval != null) {
-              setState(() {
-                _interval = newInterval;
-              });
-              if (await FlutterForegroundTask.isRunningService) {
-                _stopForegroundTask().then((_) {
-                  _initForegroundTask(
-                      interval: _interval); // Re-initialize with new interval
-                  _startForegroundTask(); // Restart the task
-                });
-              }
-            }
-          }
-        },
+    Widget intervalRow() {
+      return Row(
+        children: [
+          // Interval label
+          const Text(
+            'interval(ms):',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _intervalController,
+              keyboardType: TextInputType.number,
+              maxLength: 8,
+              maxLengthEnforcement: MaxLengthEnforcement.none,
+              decoration: const InputDecoration(
+                counterText: '',
+                hintText: 'Enter a max 8-digit interval',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
-    return Column(
-      children: [
-        buttonBuilder('Start Foreground Task', onPressed: _startForegroundTask),
-        buttonBuilder('Stop Foreground Task', onPressed: _stopForegroundTask),
-        intervalTextField(),
-        Expanded(child: _buildLoggerView()),
-      ],
+    Widget buttonsRow() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          customButton('Stop', Colors.red.shade100,
+              onPressed: _stopForegroundTask),
+          customButton('Start', Colors.grey.shade300, onPressed: () async {
+            setState(() {
+              interval = int.parse(_intervalController.text);
+            });
+            await _stopForegroundTask();
+            _initForegroundTask();
+            await _startForegroundTask();
+          }),
+        ],
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.4),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          intervalRow(),
+          const SizedBox(height: 12),
+          buttonsRow(),
+        ],
+      ),
     );
   }
 
@@ -253,22 +285,21 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 0),
             child: IntrinsicHeight(
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "${location['timestamp']}: ",
-                      style: const TextStyle(color: Colors.amber, fontSize: 10),
-                    ),
-                    TextSpan(
-                      text: "Current: (${location['latitude']}, ${location['longitude']}) ",
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ],
-                ),
-              )
-
-            ),
+                child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "${location['timestamp']}: ",
+                    style: const TextStyle(color: Colors.amber, fontSize: 10),
+                  ),
+                  TextSpan(
+                    text:
+                        "Current: (${location['latitude']}, ${location['longitude']}) ",
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ],
+              ),
+            )),
           );
         },
         separatorBuilder: (context, index) => Container(
@@ -282,4 +313,14 @@ class _RealTimeLocationPageState extends State<RealTimeLocationPage> {
     );
   }
 
+  Widget _buildCombinedView() {
+    return Column(
+      children: [
+        _buildContentView(),
+        Expanded(
+          child: _buildLoggerView(),
+        ),
+      ],
+    );
+  }
 }
