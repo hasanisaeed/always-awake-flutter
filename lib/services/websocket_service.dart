@@ -22,7 +22,6 @@ class Websocket {
   }
 
   void listen(void Function(String message) onMessageReceived) {
-    print(">> CALLED..... in listen func");
     channel?.stream.listen(onMessageReceived as void Function(dynamic event)?);
   }
 
