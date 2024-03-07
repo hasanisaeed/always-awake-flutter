@@ -1,15 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:isolate';
 
-import 'package:always_awake_flutter/database/location_model.dart';
 import 'package:always_awake_flutter/database/repository.dart';
 import 'package:always_awake_flutter/services/location_service.dart';
 import 'package:always_awake_flutter/services/websocket_service.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-
-import '.env.dart';
 
 class CustomTaskHandler extends TaskHandler {
   SendPort? _sendPort;
@@ -20,12 +18,84 @@ class CustomTaskHandler extends TaskHandler {
 
   @override
   void onStart(DateTime timestamp, SendPort? sendPort) async {
+    log(">> Initialing task...");
     _sendPort = sendPort;
 
     // This is the default path and parameter configuration for my server.
     // Modify them according to your requirements.
-    websocket =
-        Websocket(path: 'v3/1', params: {'api_key': API_KEY, 'notify_self': 1});
+    websocket = Websocket();
+
+    _wsListen(
+        _processWSResponse); // Listen to messages that came from the socket
+  }
+
+  void _wsListen(void Function(dynamic message) onMessageReceived) {
+    websocket.listen((dynamic event) {
+      Map<String, dynamic> jsonData = json.decode(event);
+      onMessageReceived(jsonData);
+    });
+  }
+
+  /// Handle your response. My response is like this:
+  /// -----------------------------------------------
+  /// {
+  ///     "status": "success",
+  ///     "message": [
+  ///         {
+  ///             "id": 100,
+  ///             "latitude": 35.3,
+  ///             "longitude": 56.3,
+  ///             "created_at": "2024-03-07 14:10:30",
+  ///         }
+  ///     ]
+  /// }
+  /// -----------------------------------------------
+  void _processWSResponse(dynamic data) {
+    log(">> Received message: $data");
+    var locationRepository = LocationRepository();
+
+    // Assuming 'data' is already a Map<String, dynamic> as passed by _wsListen
+    var action = data['data'];
+
+    String latitude = action['message']['latitude'];
+    String longitude = action['message']['longitude'];
+    String createdAt = action['message']['created_at'];
+
+    switch (action['status']) {
+      case 'success':
+        // Call deleteRecord with the parsed data
+        locationRepository
+            .deleteRecord(
+          latitude: latitude,
+          longitude: longitude,
+          createdAt: createdAt,
+        )
+            .then((_) {
+          // Handle successful deletion
+          log(">> Record deleted successfully");
+        }).catchError((error) {
+          // Handle error
+          log(">> Error deleting record: $error");
+        });
+        break;
+      case 'error':
+        locationRepository
+            .insertRecord(
+          latitude: latitude,
+          longitude: longitude,
+          createdAt: createdAt,
+        )
+            .then((_) {
+          // Handle successful insertion
+          log(">> Record inserted successfully");
+        }).catchError((error) {
+          // Handle error
+          log(">> Error inserting record: $error");
+        });
+      // Handle other actions as needed
+      default:
+        log(">> Unknown action received in message.");
+    }
   }
 
   @override
@@ -40,12 +110,12 @@ class CustomTaskHandler extends TaskHandler {
       );
 
       final String formattedTimestamp =
-          DateFormat('yyyy:MM:dd HH:mm:ss').format(timestamp);
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(timestamp);
 
       final Map<String, dynamic> locationMap = {
         'latitude': locationData.latitude,
         'longitude': locationData.longitude,
-        'timestamp': formattedTimestamp,
+        'created_at': formattedTimestamp,
       };
 
       websocket.sendMessage(locationMap);
@@ -58,13 +128,13 @@ class CustomTaskHandler extends TaskHandler {
 
   @override
   void onDestroy(DateTime timestamp, SendPort? sendPort) async {
-    log('>> onDestroy');
+    log('>> onDestroy called.');
     websocket.disconnect();
   }
 
   @override
   void onNotificationButtonPressed(String id) {
-    log('>> onNotificationButtonPressed >> $id');
+    log('>> onNotificationButtonPressed with ID: $id');
   }
 
   @override
@@ -73,15 +143,3 @@ class CustomTaskHandler extends TaskHandler {
     _sendPort?.send('onNotificationPressed');
   }
 }
-
-// void saveIntoDatabase() {
-//   var newTrip = LocationModel(
-//     latitude: 36.40979,
-//     longitude: 54.946442,
-//     speed: 50,
-//     createdAt: DateTime.now()
-//         .toString(), // Or handle createdAt within the Trip model or database default value
-//   );
-//
-//   LocationRepository().insertTrip(newTrip);
-// }
