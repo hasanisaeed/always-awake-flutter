@@ -3,7 +3,6 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:flutter/material.dart';
 
-import '../.env.dart';
 import '../services/websocket_service.dart';
 import 'dialog.dart';
 import '../services/location_service.dart';
@@ -26,8 +25,7 @@ class _ManualLocationPageState extends State<ManualLocationPage> {
   }
 
   void _initWebSocket() {
-    websocket =
-        Websocket(path: 'v3/1', params: {'api_key': API_KEY, 'notify_self': 1});
+    websocket = Websocket();
   }
 
   @override

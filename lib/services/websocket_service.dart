@@ -9,17 +9,11 @@ import '../.env.dart';
 class Websocket {
   WebSocketChannel? channel;
 
-  Websocket({required String path, Map<String, dynamic>? params}) {
-    // Convert the params Map into a URL query string if it's not null
-    String queryString = params != null ? _mapToQueryString(params) : "";
-
-    String uriString = "$protocol://$host/$path" +
-        (queryString.isNotEmpty ? "?$queryString" : "");
-
+  Websocket() {
     try {
-      channel = WebSocketChannel.connect(Uri.parse(uriString));
+      channel = WebSocketChannel.connect(Uri.parse(WS_URL));
     } catch (e) {
-      log(">> Could not connect to the websocket: $uriString");
+      log(">> Could not connect to the websocket: $WS_URL");
     }
   }
 
@@ -28,6 +22,7 @@ class Websocket {
   }
 
   void listen(void Function(String message) onMessageReceived) {
+    print(">> CALLED..... in listen func");
     channel?.stream.listen(onMessageReceived as void Function(dynamic event)?);
   }
 
@@ -44,12 +39,4 @@ class Websocket {
   bool isConnected() {
     return channel?.closeCode == null;
   }
-}
-
-/// Helper function to convert Map<String, dynamic> to a query string
-String _mapToQueryString(Map<String, dynamic> params) {
-  return params.entries
-      .map((e) =>
-          '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}')
-      .join('&');
 }
